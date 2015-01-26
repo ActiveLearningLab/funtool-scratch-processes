@@ -16,21 +16,16 @@ import funtool.reporter
 
 def save(reporter,state_collection,overriding_parameters=None,logging=None):
     reporter_parameters= funtool.reporter.get_parameters(reporter,overriding_parameters)
+
+    save_path= funtool.reporter.get_default_save_path(reporter_parameters)
+    if not os.path.exists(save_path): os.makedirs(save_path)
+
     if not _can_write(reporter_parameters):
-        raise ReporterError("Can't write to %s at %s" % (reporter_parameters['filename'], reporter_parameters['save_directory'] ) )
+        raise funtool.reporter.ReporterError("Can't write to %s at %s" % (reporter_parameters['filename'], reporter_parameters['save_directory'] ) )
     meta_keys= sorted(_gather_keys(state_collection, 'meta'))
     measures_keys= sorted(_gather_keys(state_collection, 'measures'))
 
-    if reporter_parameters.get('analysis_start_time') != None:
-        save_path= os.path.join(reporter_parameters['save_directory'],
-            "history",
-            reporter_parameters['analysis_start_time'])
-    else:
-        save_path= os.path.join(reporter_parameters['save_directory'])
-    
     path_and_filename= os.path.join(save_path,".".join([reporter_parameters['filename'], reporter_parameters['file_type']]))
-
-    if not os.path.exists(save_path): os.makedirs(save_path)
 
     with open( path_and_filename, 'w', newline='' ) as f:
         writer = _get_writer(reporter_parameters,f)
