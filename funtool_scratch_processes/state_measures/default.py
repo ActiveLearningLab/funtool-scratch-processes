@@ -263,7 +263,7 @@ def creation_time_from_filename(state,parameters):
     return datetime.datetime.fromtimestamp(seconds_since_epoch)
 
 @funtool.state_measure.state_and_parameter_measure
-def total_scripts(state_measure, analysis_collection, state_collection, overriding_parameters=None):
+def total_scripts(state,parameters):
     """
     Counts the total number of scripts in a state, including the stage
 

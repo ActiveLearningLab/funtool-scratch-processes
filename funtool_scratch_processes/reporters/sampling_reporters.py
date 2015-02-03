@@ -6,6 +6,7 @@ import funtool.reporter
 import pprint
 import random
 import os.path
+import sys
 
 def save_sample(reporter,state_collection,overriding_parameters=None,logging=None):
     reporter_parameters= funtool.reporter.get_parameters(reporter,overriding_parameters)
@@ -29,21 +30,12 @@ def save_sample(reporter,state_collection,overriding_parameters=None,logging=Non
 
         with open( path_and_filename, 'w', newline='') as f:
             pp = pprint.PrettyPrinter(depth=reporter_parameters['print_depth'], indent=2, stream=f )
-            pp.pprint('State')
-            pp.pprint('=====')
-            for field in sample_state._fields:
-                pp.pprint(field)
-                pp.pprint('-'*len(field))
-                pp.pprint(getattr(sample_state,field))
+            print_fields(pp,sample_state)
 
     if 'stdio' in reporter_parameters['output_to']:
         pp = pprint.PrettyPrinter(depth=reporter_parameters['print_depth'], indent=2 )
-        pp.pprint('State')
-        pp.pprint('=====')
-        for field in sample_state._fields:
-            pp.pprint(field)
-            pp.pprint('-'*len(field))
-            pp.pprint(getattr(sample_state,field))
+        print_fields(pp,sample_state)
+
 
     return state_collection
 
@@ -58,4 +50,36 @@ def _can_write(reporter_parameters):
     path_and_filename=  os.path.join(reporter_parameters['save_directory'],".".join([reporter_parameters['filename'], reporter_parameters['file_type']]))
     return os.path.exists(reporter_parameters['save_directory']) and ( not os.path.exists(path_and_filename) or reporter_parameters['overwrite'] )
 
-
+def print_fields(pp,state):
+    pp.pprint('State')
+    pp.pprint('=====')
+    pp.pprint('')
+    pp.pprint('id')
+    pp.pprint('--')
+    pp.pprint('')
+    pp.pprint(state.id)
+    pp.pprint('')
+    pp.pprint('')
+    pp.pprint('data')
+    pp.pprint('----')
+    pp.pprint('')
+    pp.pprint(state.data)
+    pp.pprint('')
+    pp.pprint('')
+    pp.pprint('measures')
+    pp.pprint('--')
+    pp.pprint('')
+    pp.pprint(state.measures)
+    pp.pprint('')
+    pp.pprint('')
+    pp.pprint('meta')
+    pp.pprint('--')
+    pp.pprint('')
+    pp.pprint(state.meta)
+    pp.pprint('')
+    pp.pprint('')
+    pp.pprint('groups_dict')
+    pp.pprint('--')
+    pp.pprint('')
+    pp._depth=1       # set firm limit to keep recursive printing from exploding
+    pp.pprint(state.groups_dict)
