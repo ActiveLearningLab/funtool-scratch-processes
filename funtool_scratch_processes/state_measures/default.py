@@ -10,6 +10,7 @@ import datetime
 import re
 
 import funtool.state_measure
+import funtool_scratch_processes.state_measures.shared as shared
 
 
 
@@ -166,7 +167,7 @@ def block_counts(state_measure, analysis_collection, state_collection, overridin
       parameters: !!null
     """
     measure_parameters = funtool.state_measure.get_measure_parameters(state_measure, overriding_parameters)
-    block_counts= _block_counts(_state_scripts(analysis_collection.state) )
+    block_counts= shared.block_counts( shared.state_scripts(analysis_collection.state) )
     for block_type,block_count in block_counts.items():
         analysis_collection.state.measures[block_type+"_count"]=block_count
     return analysis_collection
@@ -235,7 +236,7 @@ def measure_ratio(state,parameters):
     measure_default = parameters.get('measure_default',0)
     a_value= state.measures.get(a_measure,measure_default)
     b_value= state.measures.get(b_measure,measure_default)
-    return _compute_ratio(a_value,b_value)
+    return shared.compute_ratio(a_value,b_value)
 
 @funtool.state_measure.state_and_parameter_measure
 def creation_time_from_filename(state,parameters):
@@ -276,7 +277,7 @@ def total_scripts(state,parameters):
       grouping_selectors: !!null
       parameters: !!null
     """
-    return len(_state_scripts(state))
+    return len( shared.state_scripts(state))
 
 @funtool.state_measure.state_and_parameter_measure
 def scripts_with_block(state,parameters): #includes stage
@@ -297,7 +298,7 @@ def scripts_with_block(state,parameters): #includes stage
     """
     block_name = parameters['block_name']
     count = 0
-    for script in _state_scripts(state):
+    for script in shared.state_scripts(state):
         if block_name in str(script):
             count += 1
     return count
@@ -317,7 +318,7 @@ def total_sprites(state,parameters):
       grouping_selectors: !!null
       parameters: !!null
     """
-    return len(_all_sprites(state))
+    return len( shared.all_sprites(state))
 
 
 @funtool.state_measure.state_and_parameter_measure
@@ -334,7 +335,7 @@ def number_of_scripted_sprites(state,parameters):
       grouping_selectors: !!null
       parameters: !!null
     """
-    return len([ sprite for sprite in _all_sprites(state) if 'scripts' in sprite ] )
+    return len([ sprite for sprite in shared.all_sprites(state) if 'scripts' in sprite ] )
 
 
 @funtool.state_measure.state_and_parameter_measure
@@ -355,7 +356,7 @@ def number_of_sprites_with_block(state,parameters):
         block_name: whenGreenFlag 
     """
     count= 0
-    for sprite in _all_sprites(state):
+    for sprite in shared.all_sprites(state):
         for script in sprite.get('scripts',[]):
             if parameters['block_name'] in str(script):
                 count += 1
@@ -375,7 +376,7 @@ def scripted_stage(state,parameters):
       grouping_selectors: !!null
       parameters: !!null
     """
-    return ( 1 if len(_stage_scripts) > 0 else 0 )
+    return ( 1 if len( shared.stage_scripts) > 0 else 0 )
 
 @funtool.state_measure.state_and_parameter_measure
 def number_of_blocks_of_type(state,parameters):
@@ -391,80 +392,6 @@ def number_of_blocks_of_type(state,parameters):
       grouping_selectors: !!null
       parameters: !!null
     """
-    return sum([ str(_state_scripts(state)).count(block) for block in parameters.get('blocks',[]) ])
+    return sum([ str( shared.state_scripts(state)).count(block) for block in parameters.get('blocks',[]) ])
 
-
-def _state_scripts(state): 
-    """
-    returns all the scripts in the state
-    """
-    json_data= state.data.get('json')
-    scripts=[]
-    if json_data != None:
-        scripts.extend(json_data.get('scripts',[]))  #stage scripts
-        for child in json_data.get('children'):
-            scripts.extend(child.get('scripts',[]))
-    return scripts
-
-def _block_counts(scripts):
-    """
-    Counts all blocks in a script, returns a dict with keys being the block name and values being the counts
-    """
-    block_counts={}
-    for script in scripts:
-        if isinstance(script, list):
-            if isinstance(script[0],str):
-                block_counts[script[0]] = block_counts.get(script[0],0) + 1
-            for subvalue in script:
-                if isinstance(subvalue, list):
-                    for block_type, block_count in _block_counts(subvalue).items():
-                        block_counts[block_type] = block_counts.get(block_type,0) + block_count
-    return block_counts
-
-def _compute_ratio(a_value,b_value):
-    """
-    Computes the ratio between two values, handles divide by zero errors
-
-    """
-    if b_value == 0:
-        if a_value == 0:
-            ratio= float('Nan')
-        else:
-            ratio= math.copysign(float('inf'),a_value)
-    else:
-        ratio= a_value/b_value
-    return ratio
-
-def _all_sprite_scripts(state): 
-    """
-    Finds all scripts in sprites DOES NOT include stage
-    returns a list of lists, each sublist is a list of scripts for each sprite
-    """
-    json_data= state.data.get('json')
-    sprite_scripts=[]
-    if json_data != None:
-        for child in json_data.get('children'):
-            if 'scripts' in child:
-                sprite_scripts.append(child.get('scripts',[]))
-    return sprite_scripts
-
-def _stage_scripts(state): 
-    """
-    Returns a list of scripts for the stage 
-    """
-    return state.data.git('json').get('scripts',[])
-
-
-def _all_sprites(state):
-    """
-    Returns a list of sprites in the state
-    """
-    json_data= state.data.get('json')
-    sprites=[]
-    if json_data != None:
-        for child in json_data.get('children'):
-            if 'spriteInfo' in child:
-                sprites.append(child)
-    return sprites
-    
 

@@ -5,6 +5,7 @@ import funtool.adaptor
 import funtool.state_collection
 import funtool.state
 import funtool.group
+import funtool.grouping_selector
 
 import gzip
 import json
@@ -48,11 +49,11 @@ def _import_projects_directory(directory_path, meta):
         project_meta = meta.copy()
         project_meta.update({'project_directory':project_directory}) 
         project_states = _import_directory( os.path.join(directory_path, project_directory), project_meta )
-        project_group = funtool.group.create_group('project_directory',project_states,{}, project_meta)
+        project_group = funtool.group.create_group('projects_directory',project_states,{}, project_meta)
         groups.append(project_group)
         state_list += project_states
 
-    return funtool.state_collection.StateCollection(states=state_list,groups_dict={'project_directory':groups}) 
+    return funtool.state_collection.StateCollection(states=state_list,groups_dict={'projects_directory':groups}) 
 
 def _import_users_directory(directory_path, meta):
     user_directories= [ user_directory for user_directory in os.listdir(directory_path) 
@@ -61,10 +62,13 @@ def _import_users_directory(directory_path, meta):
     for user_directory in user_directories:
         user_meta=meta.copy()
         user_meta.update({'user_directory':user_directory})
+        projects_collection= _import_projects_directory( os.path.join(directory_path,user_directory), user_meta )
+        user_group= funtool.group.create_group('users_directory',project_collection.states,{}, user_meta)
         state_collection= funtool.state_collection.join_state_collections( 
             state_collection, 
-            _import_projects_directory( os.path.join(directory_path,user_directory), user_meta )
+            projects_collection
         )
+        state_collection= funtool.grouping_selector.add_groups_to_grouping(state_collection,'users_directory',user_group)
     return state_collection
        
 

@@ -17,8 +17,8 @@ def average(group_measure, analysis_collection, state_collection, overriding_par
             total += state_value
             count += 1
     if count != 0:
-        analysis_collection.group.measures[group_measure.measure_name]= total/count
+        analysis_collection.group.measures[group_measure.name]= total/count
     else:
-        analysis_collection.group.measures[group_measure.measure_name]= None
+        analysis_collection.group.measures[group_measure.name]= None
     return analysis_collection
 
