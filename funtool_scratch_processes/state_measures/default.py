@@ -204,7 +204,7 @@ def sum_measures(state,parameters):
     if parameters.get('default_value'):
         default_value= parameters.get('default_value')
     for measure in parameters.get('measures',[]):
-        total += state.measures.get('measures',default_value)
+        total += state.measures.get(measure,default_value)
     return total
 
 

@@ -2,6 +2,7 @@
 # NOT intended to be used independently as state_measures
 
 import math
+import numbers
 
 def state_scripts(state): 
     """
@@ -75,5 +76,12 @@ def all_sprites(state):
             if 'spriteInfo' in child:
                 sprites.append(child)
     return sprites
-    
 
+def strip_position(script):
+    """
+    returns the script block list after removing the script position
+    """
+    if isinstance(script, list) and len(script) == 3 and isinstance(script[0], numbers.Number) and isinstance(script[1], numbers.Number):
+        return script[2]
+    else:
+        return script

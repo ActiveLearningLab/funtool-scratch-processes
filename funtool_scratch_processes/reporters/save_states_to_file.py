@@ -33,6 +33,7 @@ def save(reporter,state_collection,overriding_parameters=None,logging=None):
         for state in state_collection.states:
             state_values= [ state.meta.get(meta_key) for meta_key in meta_keys ] + [ state.measures.get(measure_key) for measure_key in measures_keys ] 
             _write_line(reporter,writer, state_values)
+    funtool.reporter.link_latest_output(reporter_parameters['save_directory'])
     return state_collection
 
 
