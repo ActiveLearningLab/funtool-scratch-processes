@@ -37,7 +37,7 @@ def import_directory(adaptor,state_collection, overriding_parameters=None,logger
 # Internal Functions
 
 def _import_collection_directory(directory_path, meta):
-    return funtool.state_collection.StateCollection(states=_import_directory(directory_path,meta),groups_dict={})
+    return funtool.state_collection.StateCollection(states=_import_directory(directory_path,meta),groupings={})
     
 
 def _import_projects_directory(directory_path, meta):
@@ -49,11 +49,11 @@ def _import_projects_directory(directory_path, meta):
         project_meta = meta.copy()
         project_meta.update({'project_directory':project_directory}) 
         project_states = _import_directory( os.path.join(directory_path, project_directory), project_meta )
-        project_group = funtool.group.create_group('projects_directory',project_states,{}, project_meta)
+        project_group = funtool.group.create_group('projects_directory',project_states,{}, project_meta, {})
         groups.append(project_group)
         state_list += project_states
 
-    return funtool.state_collection.StateCollection(states=state_list,groups_dict={'projects_directory':groups}) 
+    return funtool.state_collection.StateCollection(states=state_list,groupings={'projects_directory':groups}) 
 
 def _import_users_directory(directory_path, meta):
     user_directories= [ user_directory for user_directory in os.listdir(directory_path) 
@@ -63,7 +63,7 @@ def _import_users_directory(directory_path, meta):
         user_meta=meta.copy()
         user_meta.update({'user_directory':user_directory})
         projects_collection= _import_projects_directory( os.path.join(directory_path,user_directory), user_meta )
-        user_group= funtool.group.create_group('users_directory',project_collection.states,{}, user_meta)
+        user_group= funtool.group.create_group('users_directory',project_collection.states,{}, user_meta, {})
         state_collection= funtool.state_collection.join_state_collections( 
             state_collection, 
             projects_collection
@@ -90,19 +90,19 @@ def _import_directory(directory_path, meta):
 
 def create_state_from_json(file_location, state_id, meta ):
     with open(file_location) as f:
-        data = json.loads(str(f.read(),'utf-8'))
-        new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groups_dict={})
+        data = json.loads(f.read())
+        new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groupings={})
     return new_state
 
 def create_state_from_gz(file_location, state_id, meta ):
     with gzip.open(file_location) as f:
         data = json.loads(str(f.read(),'utf-8'))
-        new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groups_dict={})
+        new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groupings={})
     return new_state
 
 def create_state_from_sb2(file_location, state_id, meta ):
     archive = zipfile.ZipFile(file_location, 'r')
     sb2_json = archive.read('project.json')
     data = json.loads(str(sb2_json,'utf-8'))
-    new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groups_dict={})
+    new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groupings={})
     return new_state

@@ -7,8 +7,8 @@ import funtool.grouping_selector
 import collections
 
 def all(grouping_selector,state_collection,overriding_parameters,loggers=None):
-    state_collection.groups_dict[grouping_selector.name]= [ 
-        funtool.group.create_group( grouping_selector.name, state_collection.states, {}, {} )
+    state_collection.groupings[grouping_selector.name]= [ 
+        funtool.group.create_group( grouping_selector.name, state_collection.states, {}, {}, {})
     ]
     return state_collection
 
@@ -40,12 +40,17 @@ def by_measures_and_meta(grouping_selector,state_collection,overriding_parameter
         for meta_name in selector_parameters.get('meta'):
             key_values.append(state.meta.get(meta_name))
         grouped_states[tuple(key_values)].append(state)
-    state_collection.groups_dict[grouping_selector.name]= [ 
+    state_collection.groupings[grouping_selector.name]= [ 
         funtool.group.create_group( 
             grouping_selector.name, 
             states, 
             {}, 
-            dict(zip( (selector_parameters.get('measures') + selector_parameters.get('meta')) ,grouping_value)) 
+            dict(zip( 
+                    ([ 'measures:'+ measure_name for measure_name in selector_parameters.get('measures')] + 
+                     [ 'meta:'+ meta_name for meta_name in selector_parameters.get('meta')]) ,
+                grouping_value)
+            ),
+            {}
         ) 
         for grouping_value, states in grouped_states.items() 
     ]

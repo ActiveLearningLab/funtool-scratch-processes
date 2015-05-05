@@ -78,8 +78,8 @@ def print_fields(pp,state):
     pp.pprint(state.meta)
     pp.pprint('')
     pp.pprint('')
-    pp.pprint('groups_dict')
+    pp.pprint('groupings')
     pp.pprint('--')
     pp.pprint('')
     pp._depth=1       # set firm limit to keep recursive printing from exploding
-    pp.pprint(state.groups_dict)
+    pp.pprint(state.groupings)
