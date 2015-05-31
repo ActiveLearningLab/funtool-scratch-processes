@@ -63,7 +63,7 @@ def _import_users_directory(directory_path, meta):
         user_meta=meta.copy()
         user_meta.update({'user_directory':user_directory})
         projects_collection= _import_projects_directory( os.path.join(directory_path,user_directory), user_meta )
-        user_group= funtool.group.create_group('users_directory',project_collection.states,{}, user_meta, {})
+        user_group= funtool.group.create_group('users_directory',projects_collection.states,{}, user_meta, {})
         state_collection= funtool.state_collection.join_state_collections( 
             state_collection, 
             projects_collection
