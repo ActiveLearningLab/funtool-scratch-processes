@@ -31,7 +31,7 @@ def save(reporter,state_collection,overriding_parameters=None,logging=None):
         writer = _get_writer(reporter_parameters,f)
         _write_line(reporter_parameters,writer, (['grouping_name'] + meta_keys + measures_keys) )
         for (grouping_name, groups) in state_collection.groupings.items():
-            for group in groups:
+            for group in groups.values():
                 group_values= [ grouping_name] +  \
                     [ group.meta.get(meta_key) for meta_key in meta_keys ] + \
                     [ group.measures.get(measure_key) for measure_key in measures_keys ] 
@@ -45,7 +45,7 @@ def save(reporter,state_collection,overriding_parameters=None,logging=None):
 def _gather_keys(state_collection, key_type):
     collection_keys = {} 
     for (grouping_name,groups) in state_collection.groupings.items():
-        for group in groups:
+        for group in groups.values():
             for group_keys in group.__getattribute__(key_type).keys():
                 collection_keys[group_keys] = 1
     return list(collection_keys.keys())

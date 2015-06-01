@@ -21,13 +21,16 @@ import os
 # Adaptor Functions
      
 def import_users_directory(adaptor,state_collection, overriding_parameters=None,loggers=None):
-    return _import_users_directory(adaptor.data_location,{})
+    adaptor_parameters= funtool.adaptor.get_adaptor_parameters(adaptor, overriding_parameters)
+    return _import_users_directory(adaptor_parameters.get('data_location'),{})
 
 def import_projects_directory(adaptor,state_collection, overriding_parameters=None,loggers=None):
-    return _import_projects_directory(adaptor.data_location,{})
+    adaptor_parameters= funtool.adaptor.get_adaptor_parameters(adaptor, overriding_parameters)
+    return _import_projects_directory(adaptor_parameters.get('data_location'),{})
 
 def import_directory(adaptor,state_collection, overriding_parameters=None,loggers=None):
-    return _import_collection_directory(adaptor.data_location,{})
+    adaptor_parameters= funtool.adaptor.get_adaptor_parameters(adaptor, overriding_parameters)
+    return _import_collection_directory(adaptor_parameters.get('data_location'),{})
 
 
 
@@ -44,13 +47,13 @@ def _import_projects_directory(directory_path, meta):
     project_directories= [ project_directory for project_directory in os.listdir(directory_path) 
                             if os.path.isdir(os.path.join(directory_path,project_directory))]
     state_list=[]
-    groups=[]
+    groups={}
     for project_directory in project_directories:
         project_meta = meta.copy()
         project_meta.update({'project_directory':project_directory}) 
         project_states = _import_directory( os.path.join(directory_path, project_directory), project_meta )
         project_group = funtool.group.create_group('projects_directory',project_states,{}, project_meta, {})
-        groups.append(project_group)
+        groups[project_directory]=project_group
         state_list += project_states
 
     return funtool.state_collection.StateCollection(states=state_list,groupings={'projects_directory':groups}) 
@@ -68,7 +71,7 @@ def _import_users_directory(directory_path, meta):
             state_collection, 
             projects_collection
         )
-        state_collection= funtool.grouping_selector.add_groups_to_grouping(state_collection,'users_directory',user_group)
+        state_collection= funtool.state_collection.add_group_to_grouping(state_collection,'users_directory',user_group, user_directory)
     return state_collection
        
 

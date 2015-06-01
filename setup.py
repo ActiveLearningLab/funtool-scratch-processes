@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='funtool-scratch-processes',
-        version='0.0.39',
+        version='0.0.40',
         description='process to be used with the FUN Tool to analyze Scratch projects',
         author='Active Learning Lab',
         author_email='pjanisiewicz@gmail.com',
