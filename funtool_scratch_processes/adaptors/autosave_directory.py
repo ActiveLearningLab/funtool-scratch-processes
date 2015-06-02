@@ -10,6 +10,8 @@ import funtool.grouping_selector
 import gzip
 import json
 import zipfile
+import codecs
+import chardet
 
 import os
 
@@ -92,9 +94,16 @@ def _import_directory(directory_path, meta):
  
 
 def create_state_from_json(file_location, state_id, meta ):
-    with open(file_location) as f:
-        data = json.loads(f.read())
-        new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groupings={})
+    try:
+        with open(file_location, 'rb') as f:
+            data = json.loads(str(f.read(), 'utf-8'))
+            new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groupings={})
+    except (ValueError, UnicodeDecodeError):
+        encoding= _detect_encoding(file_location)
+        print(encoding)
+        with open(file_location, 'rb') as f:
+            data = json.loads(str(f.read(), encoding))
+            new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groupings={})
     return new_state
 
 def create_state_from_gz(file_location, state_id, meta ):
@@ -109,3 +118,17 @@ def create_state_from_sb2(file_location, state_id, meta ):
     data = json.loads(str(sb2_json,'utf-8'))
     new_state = funtool.state.State(id=state_id, data={'json':data},measures={},meta=meta,groupings={})
     return new_state
+
+
+def _detect_encoding(file_location):
+    test_bytes = min(32, os.path.getsize(file_location))
+    with open(file_location, 'rb') as f:
+        raw= f.read(test_bytes)
+
+        if raw.startswith(codecs.BOM_UTF8):
+            encoding = 'utf-8-sig'
+        else:
+            result = chardet.detect(raw)
+            encoding = result['encoding']
+    return encoding
+    
